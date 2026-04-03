@@ -13,7 +13,7 @@ pipeline {
             steps {
                 sh'''
                 echo "building docker image"
-                docker build -t $IMAGE_NAME:latest .
+                docker build --no-cache -t $IMAGE_NAME:v2 .
                 '''
             }
         }
@@ -21,7 +21,7 @@ pipeline {
             steps{
                 sh'''
                 echo "running test"
-                docker run --rm $IMAGE_NAME:latest pytest --maxfail=1 --disable-warnings -v || true
+                docker run --rm $IMAGE_NAME:v2 pytest --maxfail=1 --disable-warnings -v || true
                 '''
             }
         }
@@ -33,7 +33,7 @@ pipeline {
                 docker rm $IMAGE_NAME || true
                 
                 echo "running new container"
-                docker run -d --name $IMAGE_NAME -p 5000:5000 --restart=always $IMAGE_NAME:latest
+                docker run -d --name $IMAGE_NAME -p 5000:5000 --restart=always $IMAGE_NAME:v2
                 '''
             }
         }
