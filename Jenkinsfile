@@ -6,7 +6,7 @@ pipeline {
     stages{
         stage('checkout'){
             steps{
-                git branch: 'main', url: "https://github.com/vaibhavswami13/aws-devops-microservice-project"
+                git branch: 'main', url: "https://github.com/vaibhavswami13/Devops_Micro_Product_service_project"
             }
         }
         stage ('Build Docker Image'){
