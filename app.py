@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "DevOps product-service app running on eks pod, you did freat Vaibhav, 2 days work paid off"
+    return "DevOps product-service app running on eks pod, you did freat Vaibhav, 3  days work paid off"
 
 @app.route("/health")
 def health():

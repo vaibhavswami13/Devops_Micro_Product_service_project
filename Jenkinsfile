@@ -9,17 +9,14 @@ pipeline {
     stages {
         stage ('checkout') {
             steps {
-                deleteDir()
                 git branch:'main',url:"https://github.com/vaibhavswami13/Devops_Micro_Product_service_project"
             }
         }
         stage('build & test') {
             steps {
                 sh'''
-                rm -rf venv
                 python3 -m venv venv
                 . venv/bin/activate
-                pip install --upgrade pip
                 pip install -r requirements.txt
                 pytest || echo "no test failed"
                 '''
@@ -43,7 +40,9 @@ pipeline {
             steps{
                 sh'''
                 docker tag $REPO:$BUILD_NUMBER $IMAGE:$BUILD_NUMBER
+                docker tag $REPO:$BUILD_NUMBER $IMAGE:$latest
                 docker push $IMAGE:$BUILD_NUMBER
+                docker push $IMAGE:latest
                 '''
             }
         }
