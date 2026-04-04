@@ -43,9 +43,7 @@ pipeline {
             steps{
                 sh'''
                 docker tag $REPO:$BUILD_NUMBER $IMAGE:$BUILD_NUMBER
-                docker tag $REPO:$BUILD_NUMBER $IMAGE:latest
                 docker push $IMAGE:$BUILD_NUMBER
-                docker push $IMAGE:latest
                 '''
             }
         }
