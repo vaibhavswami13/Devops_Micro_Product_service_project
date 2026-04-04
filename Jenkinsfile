@@ -9,6 +9,7 @@ pipeline {
     stages {
         stage ('checkout') {
             steps {
+                deleteDir()
                 git branch:'main',url:"https://github.com/vaibhavswami13/Devops_Micro_Product_service_project"
             }
         }
