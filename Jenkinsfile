@@ -1,49 +1,74 @@
 pipeline {
     agent any
-    environment{
-        IMAGE_NAME="product-service"
-    }
-    stages{
-        stage('checkout'){
-            steps{
-                git branch: 'main', url: "https://github.com/vaibhavswami13/Devops_Micro_Product_service_project"
+    environment {
+        AWS_REGION ="ap-south-1"
+        ACCOUNT_ID= "256664600401"
+        REPO = "product-service"
+        IMAGE="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO}"
+        }
+    stages {
+        stage ('checkout') {
+            steps {
+                git branch:'main',url:"https://github.com/vaibhavswami13/Devops_Micro_Product_service_project"
             }
         }
-        stage ('Build Docker Image'){
+        stage('build & test') {
             steps {
                 sh'''
-                echo "building docker image"
-                docker build --no-cache -t $IMAGE_NAME:v2 .
+                python3 -m venv venv
+                . venv/bin/activate
+                pip install -r requirements.txt
+                pytest
                 '''
             }
         }
-        stage ('Run app code test Inside Container'){
-            steps{
-                sh'''
-                echo "running test"
-                docker run --rm $IMAGE_NAME:v2 pytest --maxfail=1 --disable-warnings -v || true
-                '''
-            }
-        }
-        stage ('Deploy container'){
+        stage ('docker build') {
             steps {
                 sh'''
-                echo "remove old containers if available"
-                docker stop $IMAGE_NAME || true
-                docker rm $IMAGE_NAME || true
-                
-                echo "running new container"
-                docker run -d --name $IMAGE_NAME -p 5000:5000 --restart=always $IMAGE_NAME:v2
+                docker build --no-cache -t $REPO:$BUILD_NUMBER .
                 '''
             }
         }
-    }
-    post{
-        success{
-            echo "application deployed successfully! access using url:http://<ec2>:5000"
+        stage('ECR Login') {
+            steps {
+                sh'''
+                aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                '''
+            }
         }
-        failure{
-            echo "app deployment failed! check logs"
+        stage('docker tag and push to ECR') {
+            steps{
+                sh'''
+                docker tag $REPO:$BUILD_NUMBER $IMAGE:$BUILD_NUMBER
+                docker tag $REPO:$BUILD_NUMBER $IMAGE:latest
+                docker push $IMAGE:$BUILD_NUMBER
+                docker push $IMAGE:latest
+                '''
+            }
+        }
+        stage ('deploy to eks') {
+            steps{
+                sh'''
+                kubectl set image deployment/product-service product-service=$IMAGE:$BUILD_NUMBER
+                kubectl rollout status deployment/product-service
+                '''
+            }
+        }
+        post{
+            success{
+                echo "product-service app running successfully "
+            }
+            failure{
+                echo " failed deployment! check logs"
+            }
+            always {
+                sh'''
+                echo "cleaning up docker image..."
+                docker rmi $REPO:$BUILD_NUMBER || TRUE
+                docker rmi $IMAGE:$BUILD_NUMBER || TRUE
+                docker image prune -f || TRUE
+                '''
+            }
         }
     }
 }
