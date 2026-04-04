@@ -15,10 +15,8 @@ pipeline {
         stage('build & test') {
             steps {
                 sh'''
-                python3 -m venv venv
-                . venv/bin/activate
                 pip install -r requirements.txt
-                pytest || echo "no tests found"
+                pytest || exit 1
                 '''
             }
         }
