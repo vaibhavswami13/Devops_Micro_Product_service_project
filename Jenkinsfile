@@ -18,7 +18,7 @@ pipeline {
                 python3 -m venv venv
                 . venv/bin/activate
                 pip install -r requirements.txt
-                pytest || echo"no tests found"
+                pytest || echo "no tests found"
                 '''
             }
         }
@@ -54,6 +54,7 @@ pipeline {
                 '''
             }
         }
+    }
     post {
         success{
             echo "product-service app running successfully "
@@ -64,11 +65,10 @@ pipeline {
         always {
             sh'''
             echo "cleaning up docker image..."
-            docker rmi $REPO:$BUILD_NUMBER || TRUE
-            docker rmi $IMAGE:$BUILD_NUMBER || TRUE
-            docker image prune -f || TRUE
+            docker rmi $REPO:$BUILD_NUMBER || true
+            docker rmi $IMAGE:$BUILD_NUMBER || true
+            docker image prune -f || true
             '''
         }
-    }
     }
 }
