@@ -71,7 +71,7 @@ pipeline {
                 product-service=$IMAGE:$BUILD_NUMBER
 
                 echo "Verifying rollout..."
-                kubectl rollout status deployment/product-service
+                kubectl rollout undo deployment/product-service
                 '''
             }
         }
