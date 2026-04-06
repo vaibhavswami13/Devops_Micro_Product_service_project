@@ -15,8 +15,7 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/vaibhavswami13/Devops_Micro_Product_service_project'
             }
         }
-
-        // ✅ Build Docker Image FIRST
+        
         stage ('Docker Build') {
             steps {
                 sh '''
@@ -26,7 +25,6 @@ pipeline {
             }
         }
 
-        // ✅ Test inside Docker (Production Standard)
         stage ('Test inside Docker') {
             steps {
                 sh '''
@@ -79,10 +77,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ product-service deployed successfully!"
+            echo "product-service deployed successfully"
         }
         failure {
-            echo "❌ Deployment failed! Check logs."
+            echo "Deployment failed! Check logs"
         }
         always {
             sh '''
